@@ -1,0 +1,187 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cozone</title>
+    <link rel="stylesheet" href="../src/css/pannellum.css"/>
+    <!-- <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/pannellum@2.5.6/build/pannellum.js"></script> -->
+    <script type="text/javascript" src="../src/js/libpannellum.js"></script>
+    <script type="text/javascript" src="../src/js/pannellum.js"></script>
+
+    <style>
+    #panorama {
+        width: 600px;
+        height: 400px;
+    }
+    </style>
+</head>
+<body>
+
+<div id="panorama"></div>
+<script>
+
+
+
+viewer=pannellum.viewer('panorama',    { 'scenes': {}, 'autoLoad': true, 'showFullscreenCtrl': true, 'showZoomCtrl': true } );
+
+let length = 42;
+let width = 22;
+
+for (let i = 0 ; i < length*width; i++){
+
+    viewer.addScene(`${i}`, {
+        "type": "equirectangular",
+        "panorama": `./cozone360_frames/${i}.jpg`
+
+    });
+
+}
+
+
+
+var res1, res2, res3, index=4;
+var pitch=0, yaw=0, hfov = 100;
+viewer.loadScene(`${index}`);
+
+window.addEventListener('keydown', function(event) {
+
+    var key = event.key; 
+    //console.log(pitch, yaw);
+    
+    if (yaw < 180/4 || yaw > -180/4  )   {
+        if (key=="i") key = "i";
+        else if (key=="j") key = "j";
+        else if (key=="k") key = "k";
+        else if (key=="l") key = "l";
+    } 
+    if (yaw > 180/4 && yaw < 3*180/4 )   {
+        if (key=="i") key = "l";
+        else if (key=="j") key = "i";
+        else if (key=="k") key = "j";
+        else if (key=="l") key = "k";
+
+    } 
+    if (yaw > 3*180/4 || yaw < -3*180/4)   {
+        if (key=="i") key = "k";
+        else if (key=="j") key = "l";
+        else if (key=="k") key = "i";
+        else if (key=="l") key = "j";
+
+    } 
+    if (yaw < -180/4 && yaw > -3*180/4)   {
+        if (key=="i") key = "j";
+        else if (key=="j") key = "k";
+        else if (key=="k") key = "l";
+        else if (key=="l") key = "i";
+
+    }
+
+
+
+
+    switch (key) {
+        case "j":
+            {
+                const tmp = index - length;
+                index = tmp < 0 ? index: tmp; 
+                viewer.loadScene(`${index}`);
+                viewer.setPitch(pitch, 0);
+                viewer.setYaw(yaw, 0);
+                viewer.setHfov(hfov, 0);
+               
+
+            } 
+                
+            break;
+        case "l":
+            {
+                const tmp = index + length;
+                index = tmp >= length*width ? index: tmp;
+                viewer.loadScene(`${index}`);
+                viewer.setPitch(pitch, 0);
+                viewer.setYaw(yaw, 0);
+                viewer.setHfov(hfov, 0);
+            }
+
+            break;
+        case "i":
+            {
+                const tmp = index + 1;  
+                
+                index = tmp % length == 0 ? index: tmp;
+                viewer.loadScene(`${index}`);
+                viewer.setPitch(pitch, 0);
+                viewer.setYaw(yaw, 0);
+                viewer.setHfov(hfov, 0);
+            }
+            break;
+        case "k":
+
+            {
+                const tmp = index - 1;  
+                
+                index = (tmp + 1) % length == 0 ? index: tmp;
+                viewer.loadScene(`${index}`);
+                viewer.setPitch(pitch, 0);
+                viewer.setYaw(yaw, 0);
+                viewer.setHfov(hfov, 0);
+         
+            }
+
+            break;
+        case "ArrowUp":
+            pitch = viewer.getPitch();
+            yaw = viewer.getYaw();
+
+            break;
+
+
+        case "ArrowDown":
+            pitch = viewer.getPitch();
+            yaw = viewer.getYaw();
+
+
+            
+        break;   
+        case "ArrowLeft":
+            pitch = viewer.getPitch();
+            yaw = viewer.getYaw();
+
+            break;
+
+
+        case "ArrowRight":
+            pitch = viewer.getPitch();
+            yaw = viewer.getYaw();
+
+        break;  
+
+
+
+}
+console.log(index);
+
+});
+
+window.addEventListener( 'mousemove', function (event){
+
+    pitch = viewer.getPitch();
+    yaw = viewer.getYaw();
+   
+  //  console.log(pitch, yaw, hfov);
+
+
+}, false );
+
+window.addEventListener("wheel", (event) =>{
+    hfov = viewer.getHfov();
+
+}, false);
+
+
+
+</script>
+
+</body>
+</html>
