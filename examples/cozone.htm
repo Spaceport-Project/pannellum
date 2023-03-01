@@ -17,63 +17,95 @@
     </style>
 </head>
 <body>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
 
+<input type="radio" name="foo" value="1080p" checked> 1080p
+<br/>
+<input type="radio" name="foo" value="2160p"> 2160p
 <div id="panorama"></div>
 <script>
 
 
 
-viewer=pannellum.viewer('panorama',    { 'scenes': {}, 'autoLoad': true, 'showFullscreenCtrl': true, 'showZoomCtrl': true } );
+var viewer=pannellum.viewer('panorama', { 'scenes': {}, 'autoLoad': true, 'showFullscreenCtrl': true, 'showZoomCtrl': true } );
 
 let length = 42;
 let width = 22;
 
-for (let i = 0 ; i < length*width; i++){
+var res1, res2, res3, index;
+var pitch=0, yaw=0, hfov = 100;
 
-    viewer.addScene(`${i}`, {
+$('input[type=radio]').change(function() {
+   viewer.destroy(); 
+   viewer=pannellum.viewer('panorama', { 'scenes': {}, 'autoLoad': true, 'showFullscreenCtrl': true, 'showZoomCtrl': true } );
+   addScenes(this.value);
+
+});
+
+
+function addScenes(resolution){
+   
+    for (let i = 0 ; i < length*width; i++){
+
+        viewer.addScene(`${i}`, {
         "type": "equirectangular",
-        "panorama": `./cozone360_frames/${i}.jpg`
+        // "panorama": `./cozone360_frames/${i}.jpg`
+        "panorama": `./cozone360_frames_${resolution}/${i}.jpg`
 
-    });
+        });
+
+    }
+    index = 4;
+    viewer.loadScene(`${index}`);
+}
+
+function removeScenes(){
+    for (let i = 0 ; i < length*width; i++){
+        const res = viewer.removeScene(`${i}`);
+        console.log(res);
+
+    }
+
+
 
 }
 
 
+addScenes("1080p");
 
-var res1, res2, res3, index=4;
-var pitch=0, yaw=0, hfov = 100;
-viewer.loadScene(`${index}`);
+
+
 
 window.addEventListener('keydown', function(event) {
 
     var key = event.key; 
     //console.log(pitch, yaw);
     
-    if (yaw < 180/4 || yaw > -180/4  )   {
-        if (key=="i") key = "i";
-        else if (key=="j") key = "j";
-        else if (key=="k") key = "k";
-        else if (key=="l") key = "l";
-    } 
+    // if (yaw < 180/4 || yaw > -180/4  )   {
+    //     if (key=="i") key = "i";
+    //     else if (key=="j") key = "j";
+    //     else if (key=="k") key = "k";
+    //     else if (key=="l") key = "l";
+    // } 
     if (yaw > 180/4 && yaw < 3*180/4 )   {
         if (key=="i") key = "l";
         else if (key=="j") key = "i";
         else if (key=="k") key = "j";
         else if (key=="l") key = "k";
 
-    } 
+    } else if (yaw < -180/4 && yaw > -3*180/4)   {
+        if (key=="i") key = "j";
+        else if (key=="j") key = "k";
+        else if (key=="k") key = "l";
+        else if (key=="l") key = "i";
+
+    }
+
     if (yaw > 3*180/4 || yaw < -3*180/4)   {
         if (key=="i") key = "k";
         else if (key=="j") key = "l";
         else if (key=="k") key = "i";
         else if (key=="l") key = "j";
-
-    } 
-    if (yaw < -180/4 && yaw > -3*180/4)   {
-        if (key=="i") key = "j";
-        else if (key=="j") key = "k";
-        else if (key=="k") key = "l";
-        else if (key=="l") key = "i";
 
     }
 
