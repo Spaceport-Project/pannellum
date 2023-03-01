@@ -11,37 +11,74 @@
 
     <style>
     #panorama {
-        width: 600px;
-        height: 400px;
+        width: 100%;
+        height: 98%;
+        position:absolute;
     }
+    html {
+        overflow:hidden;
+    }
+    body {
+        margin:0px;
+    }
+     #controls {
+        position: absolute;
+        bottom: 0;
+        z-index: 2;
+        text-align: center;
+        width: 100%;
+        padding-bottom: 3px;
+    }
+    .ctrl {
+        padding: 8px 5px;
+        width: 30px;
+        text-align: center;
+        background: rgba(200, 200, 200, 0.8);
+        display: inline-block;
+        cursor: pointer;
+    }
+    .ctrl:hover {
+        background: rgba(200, 200, 200, 1);
+    }
+
+
     </style>
 </head>
 <body>
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
 
-<input type="radio" name="foo" value="1080p" checked> 1080p
-<br/>
-<input type="radio" name="foo" value="2160p"> 2160p
-<div id="panorama"></div>
+<input type="radio" name="foo" value="1080p" checked> 1080p </input>
+<input type="radio" name="foo" value="2160p"> 2160p </input>
+<div id="panorama">
+    <div id="controls">
+        <div class="ctrl" id="pan-up">&#9650;</div>
+        <div class="ctrl" id="pan-down">&#9660;</div>
+        <div class="ctrl" id="pan-left">&#9664;</div>
+        <div class="ctrl" id="pan-right">&#9654;</div>
+    </div>
+
+</div>
+
 <script>
 
 
 
 var viewer = pannellum.viewer('panorama', { 'scenes': {}, 'autoLoad': true, 'showFullscreenCtrl': true, 'showZoomCtrl': true } );
 
-let length = 42;
-let width = 22;
-let height = 2;
-let area = length * width;
-let volume = length * width * height;
+const pitch_thres = 180/6;
+const yaw_thres = 180/4;
+const length = 42;
+const width = 22;
+const height = 2;
+const area = length * width;
+const volume = length * width * height;
 var h = 0;
-var res1, res2, res3, index;
+var index;
 var pitch = 0, yaw = 0, hfov = 100;
 
 $('input[type=radio]').change(function() {
    h = 0;
-   viewer.destroy(); 
-   viewer=pannellum.viewer('panorama', { 'scenes': {}, 'autoLoad': true, 'showFullscreenCtrl': true, 'showZoomCtrl': true } );
+   removeScenes()
    addScenes(this.value);
 
 });
@@ -53,7 +90,6 @@ function addScenes(resolution){
 
         viewer.addScene(`${i}`, {
         "type": "equirectangular",
-        // "panorama": `./cozone360_frames/${i}.jpg`
         "panorama": `./cozone360_frames_${resolution}/${i}.jpg`
 
         });
@@ -82,34 +118,10 @@ addScenes("1080p");
 
 window.addEventListener('keydown', function(event) {
 
-    var key = event.key; 
-    //console.log(pitch, yaw);
-  
-    if (yaw > 180/4 && yaw < 3*180/4 ) {
-        if (key=="i") key = "l";
-        else if (key=="j") key = "i";
-        else if (key=="k") key = "j";
-        else if (key=="l") key = "k";
+    //var key = event.key; 
+    console.log(pitch, yaw);
 
-    } else if (yaw < -180/4 && yaw > -3*180/4) {
-        if (key=="i") key = "j";
-        else if (key=="j") key = "k";
-        else if (key=="k") key = "l";
-        else if (key=="l") key = "i";
-
-    }
-
-    if (yaw > 3*180/4 || yaw < -3*180/4) {
-        if (key=="i") key = "k";
-        else if (key=="j") key = "l";
-        else if (key=="k") key = "i";
-        else if (key=="l") key = "j";
-
-    }
-
-
-
-  
+    var key = findKey(pitch, yaw, event.key);
 
     switch (key) {
         case "j":
@@ -242,8 +254,81 @@ window.addEventListener("wheel", (event) =>{
 
 }, false);
 
+document.getElementById('pan-up').addEventListener('click', function(e) {
+    window.dispatchEvent(new KeyboardEvent('keydown', {'key': 'i'}));
+});
+document.getElementById('pan-down').addEventListener('click', function(e) {
+     window.dispatchEvent(new KeyboardEvent('keydown', {'key': 'k'}));
+});
+document.getElementById('pan-left').addEventListener('click', function(e) {
+    window.dispatchEvent(new KeyboardEvent('keydown', {'key': 'j'}));
+});
+document.getElementById('pan-right').addEventListener('click', function(e) {
+     window.dispatchEvent(new KeyboardEvent('keydown', {'key': 'l'}));
+});
 
+function findKey(pitch, yaw, key) {
+    
 
+    if (pitch > pitch_thres && !(yaw > yaw_thres || yaw < -yaw_thres)  )   {
+        if (key=="i") key = "u";
+        else if (key=="j") key = "j";
+        else if (key=="k") key = "h";
+        else if (key=="l") key = "l";
+    } else if (pitch < -pitch_thres && !(yaw > yaw_thres || yaw < -yaw_thres)  )   {
+        if (key=="i") key = "h";
+        else if (key=="j") key = "j";
+        else if (key=="k") key = "u";
+        else if (key=="l") key = "l";
+    } else if (!(pitch > pitch_thres || pitch < -pitch_thres) && (yaw > yaw_thres && yaw < 3*yaw_thres) ) {
+        if (key=="i") key = "l";
+        else if (key=="j") key = "i";
+        else if (key=="k") key = "j";
+        else if (key=="l") key = "k";
+    } else if ( pitch > pitch_thres && (yaw > yaw_thres && yaw < 3*yaw_thres) ) {
+        if (key=="i") key = "u";
+        else if (key=="j") key = "i";
+        else if (key=="k") key = "h";
+        else if (key=="l") key = "k";
+    } else if ( pitch < -pitch_thres && (yaw > yaw_thres && yaw < 3*yaw_thres) ) {
+        if (key=="i") key = "h";
+        else if (key=="j") key = "i";
+        else if (key=="k") key = "u";
+        else if (key=="l") key = "k";
+    } else if (!(pitch > pitch_thres || pitch < -pitch_thres) && (yaw < -yaw_thres && yaw > -3*yaw_thres) ) {
+        if (key=="i") key = "j";
+        else if (key=="j") key = "k";
+        else if (key=="k") key = "l";
+        else if (key=="l") key = "i";
+    }else if (pitch > pitch_thres  && (yaw < -yaw_thres && yaw > -3*yaw_thres) ) {
+        if (key=="i") key = "u";
+        else if (key=="j") key = "k";
+        else if (key=="k") key = "h";
+        else if (key=="l") key = "i";
+    }else if (pitch < -pitch_thres  && (yaw < -yaw_thres && yaw > -3*yaw_thres) ) {
+        if (key=="i") key = "h";
+        else if (key=="j") key = "k";
+        else if (key=="k") key = "u";
+        else if (key=="l") key = "i";
+    }else if ( !(pitch > pitch_thres || pitch < -pitch_thres) && (yaw > 3*yaw_thres || yaw < -3*yaw_thres)) {
+        if (key=="i") key = "k";
+        else if (key=="j") key = "l";
+        else if (key=="k") key = "i";
+        else if (key=="l") key = "j";
+    }else if ( pitch > pitch_thres  && (yaw > 3*yaw_thres || yaw < -3*yaw_thres)) {
+        if (key=="i") key = "u";
+        else if (key=="j") key = "l";
+        else if (key=="k") key = "h";
+        else if (key=="l") key = "j";
+    }else if (  pitch < -pitch_thres && (yaw > 3*yaw_thres || yaw < -3*yaw_thres)) {
+        if (key=="i") key = "h";
+        else if (key=="j") key = "l";
+        else if (key=="k") key = "u";
+        else if (key=="l") key = "j";
+    }
+    return key;
+
+}
 </script>
 
 </body>
