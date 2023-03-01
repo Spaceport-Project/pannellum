@@ -27,15 +27,19 @@
 
 
 
-var viewer=pannellum.viewer('panorama', { 'scenes': {}, 'autoLoad': true, 'showFullscreenCtrl': true, 'showZoomCtrl': true } );
+var viewer = pannellum.viewer('panorama', { 'scenes': {}, 'autoLoad': true, 'showFullscreenCtrl': true, 'showZoomCtrl': true } );
 
 let length = 42;
 let width = 22;
-
+let height = 2;
+let area = length * width;
+let volume = length * width * height;
+var h = 0;
 var res1, res2, res3, index;
-var pitch=0, yaw=0, hfov = 100;
+var pitch = 0, yaw = 0, hfov = 100;
 
 $('input[type=radio]').change(function() {
+   h = 0;
    viewer.destroy(); 
    viewer=pannellum.viewer('panorama', { 'scenes': {}, 'autoLoad': true, 'showFullscreenCtrl': true, 'showZoomCtrl': true } );
    addScenes(this.value);
@@ -45,7 +49,7 @@ $('input[type=radio]').change(function() {
 
 function addScenes(resolution){
    
-    for (let i = 0 ; i < length*width; i++){
+    for (let i = 0 ; i < volume; i++){
 
         viewer.addScene(`${i}`, {
         "type": "equirectangular",
@@ -55,14 +59,14 @@ function addScenes(resolution){
         });
 
     }
-    index = 4;
+    index = 4 + h * area;
     viewer.loadScene(`${index}`);
 }
 
 function removeScenes(){
-    for (let i = 0 ; i < length*width; i++){
+    for (let i = 0 ; i < volume; i++){
         const res = viewer.removeScene(`${i}`);
-        console.log(res);
+       // console.log(res);
 
     }
 
@@ -80,20 +84,14 @@ window.addEventListener('keydown', function(event) {
 
     var key = event.key; 
     //console.log(pitch, yaw);
-    
-    // if (yaw < 180/4 || yaw > -180/4  )   {
-    //     if (key=="i") key = "i";
-    //     else if (key=="j") key = "j";
-    //     else if (key=="k") key = "k";
-    //     else if (key=="l") key = "l";
-    // } 
-    if (yaw > 180/4 && yaw < 3*180/4 )   {
+  
+    if (yaw > 180/4 && yaw < 3*180/4 ) {
         if (key=="i") key = "l";
         else if (key=="j") key = "i";
         else if (key=="k") key = "j";
         else if (key=="l") key = "k";
 
-    } else if (yaw < -180/4 && yaw > -3*180/4)   {
+    } else if (yaw < -180/4 && yaw > -3*180/4) {
         if (key=="i") key = "j";
         else if (key=="j") key = "k";
         else if (key=="k") key = "l";
@@ -101,7 +99,7 @@ window.addEventListener('keydown', function(event) {
 
     }
 
-    if (yaw > 3*180/4 || yaw < -3*180/4)   {
+    if (yaw > 3*180/4 || yaw < -3*180/4) {
         if (key=="i") key = "k";
         else if (key=="j") key = "l";
         else if (key=="k") key = "i";
@@ -111,17 +109,17 @@ window.addEventListener('keydown', function(event) {
 
 
 
+  
 
     switch (key) {
         case "j":
-            {
+            {               
                 const tmp = index - length;
-                index = tmp < 0 ? index: tmp; 
+                index = tmp < h * area ? index: tmp; 
                 viewer.loadScene(`${index}`);
                 viewer.setPitch(pitch, 0);
                 viewer.setYaw(yaw, 0);
                 viewer.setHfov(hfov, 0);
-               
 
             } 
                 
@@ -129,7 +127,7 @@ window.addEventListener('keydown', function(event) {
         case "l":
             {
                 const tmp = index + length;
-                index = tmp >= length*width ? index: tmp;
+                index = tmp >= ( h + 1) * area ? index: tmp;
                 viewer.loadScene(`${index}`);
                 viewer.setPitch(pitch, 0);
                 viewer.setYaw(yaw, 0);
@@ -140,7 +138,6 @@ window.addEventListener('keydown', function(event) {
         case "i":
             {
                 const tmp = index + 1;  
-                
                 index = tmp % length == 0 ? index: tmp;
                 viewer.loadScene(`${index}`);
                 viewer.setPitch(pitch, 0);
@@ -152,7 +149,6 @@ window.addEventListener('keydown', function(event) {
 
             {
                 const tmp = index - 1;  
-                
                 index = (tmp + 1) % length == 0 ? index: tmp;
                 viewer.loadScene(`${index}`);
                 viewer.setPitch(pitch, 0);
@@ -162,6 +158,41 @@ window.addEventListener('keydown', function(event) {
             }
 
             break;
+
+        case "u":
+            {
+                h++;
+                const tmp = index + area;
+                if (h < height) index = tmp;
+                else h = height -1;
+                viewer.loadScene(`${index}`);
+                viewer.setPitch(pitch, 0);
+                viewer.setYaw(yaw, 0);
+                viewer.setHfov(hfov, 0);
+                console.log("h++:", h);
+            
+            }
+            break;
+
+        case "h":
+            
+            {
+                h--;
+                const tmp = index - area;
+                if (h < 0) h = 0;
+                else index = tmp
+                viewer.loadScene(`${index}`);
+                viewer.setPitch(pitch, 0);
+                viewer.setYaw(yaw, 0);
+                viewer.setHfov(hfov, 0);
+                console.log("h--:", h);
+
+
+            }
+
+
+            break;
+
         case "ArrowUp":
             pitch = viewer.getPitch();
             yaw = viewer.getYaw();
