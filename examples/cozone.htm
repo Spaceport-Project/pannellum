@@ -12,7 +12,7 @@
     <style>
     #panorama {
         width: 100%;
-        height: 98%;
+        height: 100%;
         position:absolute;
     }
     html {
@@ -47,8 +47,8 @@
 <body>
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
 
-<input type="radio" name="foo" value="1080p" checked> 1080p </input>
-<input type="radio" name="foo" value="2160p"> 2160p </input>
+<!-- <input type="radio" name="foo" value="1080p" checked> 1080p </input>
+<input type="radio" name="foo" value="2160p"> 2160p </input> -->
 <div id="panorama">
     <div id="controls">
         <div class="ctrl" id="pan-up">&#9650;</div>
@@ -66,7 +66,7 @@
 var viewer = pannellum.viewer('panorama', { 'scenes': {}, 'autoLoad': true, 'showFullscreenCtrl': true, 'showZoomCtrl': true } );
 
 const pitch_thres = 180/6;
-const yaw_thres = 180/4;
+const yaw_thres = 180/8;
 const length = 42;
 const width = 22;
 const height = 2;
@@ -95,7 +95,7 @@ function addScenes(resolution){
         });
 
     }
-    index = 4 + h * area;
+    index = 383 + h * area;
     viewer.loadScene(`${index}`);
 }
 
@@ -119,9 +119,10 @@ addScenes("1080p");
 window.addEventListener('keydown', function(event) {
 
     //var key = event.key; 
-    console.log(pitch, yaw);
+  //  console.log(pitch, yaw);
 
     var key = findKey(pitch, yaw, event.key);
+    console.log(key);
 
     switch (key) {
         case "j":
@@ -136,6 +137,7 @@ window.addEventListener('keydown', function(event) {
             } 
                 
             break;
+
         case "l":
             {
                 const tmp = index + length;
@@ -147,6 +149,7 @@ window.addEventListener('keydown', function(event) {
             }
 
             break;
+
         case "i":
             {
                 const tmp = index + 1;  
@@ -157,8 +160,8 @@ window.addEventListener('keydown', function(event) {
                 viewer.setHfov(hfov, 0);
             }
             break;
-        case "k":
 
+        case "k":
             {
                 const tmp = index - 1;  
                 index = (tmp + 1) % length == 0 ? index: tmp;
@@ -187,12 +190,11 @@ window.addEventListener('keydown', function(event) {
             break;
 
         case "h":
-            
             {
                 h--;
                 const tmp = index - area;
                 if (h < 0) h = 0;
-                else index = tmp
+                else index = tmp;
                 viewer.loadScene(`${index}`);
                 viewer.setPitch(pitch, 0);
                 viewer.setYaw(yaw, 0);
@@ -202,7 +204,360 @@ window.addEventListener('keydown', function(event) {
 
             }
 
+            break;
 
+        case "li":
+            {
+                let tmp = index + length;
+                index = tmp >= ( h + 1) * area ? index: tmp;
+                tmp = index + 1;  
+                index = tmp % length == 0 ? index: tmp;
+                viewer.loadScene(`${index}`);
+                viewer.setPitch(pitch, 0);
+                viewer.setYaw(yaw, 0);
+                viewer.setHfov(hfov, 0);
+
+
+            }
+            break;
+
+        case "ij":
+            {
+                let tmp = index - length;
+                index = tmp < h * area ? index: tmp; 
+                tmp = index + 1;  
+                index = tmp % length == 0 ? index: tmp;
+                viewer.loadScene(`${index}`);
+                viewer.setPitch(pitch, 0);
+                viewer.setYaw(yaw, 0);
+                viewer.setHfov(hfov, 0);
+                
+            }
+            break;
+
+        case "jk": 
+            {
+                let tmp = index - length;
+                index = tmp < h * area ? index: tmp; 
+                tmp = index - 1;  
+                index = (tmp + 1) % length == 0 ? index: tmp;
+                viewer.loadScene(`${index}`);
+                viewer.setPitch(pitch, 0);
+                viewer.setYaw(yaw, 0);
+                viewer.setHfov(hfov, 0);
+
+            }
+            break;
+
+        case "kl":
+            {
+
+                let tmp = index + length;
+                index = tmp >= ( h + 1) * area ? index: tmp;
+                tmp = index - 1;  
+                index = (tmp + 1) % length == 0 ? index: tmp;
+                viewer.loadScene(`${index}`);
+                viewer.setPitch(pitch, 0);
+                viewer.setYaw(yaw, 0);
+                viewer.setHfov(hfov, 0);
+
+
+            }
+            break;
+
+        case "ui":
+            {
+                
+                
+                let tmp = index + 1;  
+                index = tmp % length == 0 ? index: tmp;
+                h++;
+                tmp = index + area;
+                if (h < height) index = tmp;
+                else h = height -1;
+                viewer.loadScene(`${index}`);
+                viewer.setPitch(pitch, 0);
+                viewer.setYaw(yaw, 0);
+                viewer.setHfov(hfov, 0)
+
+
+            }
+            break;
+        
+        case "hk":
+            {
+                let tmp = index - 1;  
+                index = (tmp + 1) % length == 0 ? index: tmp;
+                h--;
+                tmp = index - area;
+                if (h < 0) h = 0;
+                else index = tmp;
+                viewer.loadScene(`${index}`);
+                viewer.setPitch(pitch, 0);
+                viewer.setYaw(yaw, 0);
+                viewer.setHfov(hfov, 0);
+
+
+
+            }
+            break;
+
+        case "hi":
+            {
+                
+                let tmp = index + 1;  
+                index = tmp % length == 0 ? index: tmp;
+                h--;
+                tmp = index - area;
+                if (h < 0) h = 0;
+                else index = tmp;
+                viewer.loadScene(`${index}`);
+                viewer.setPitch(pitch, 0);
+                viewer.setYaw(yaw, 0);
+                viewer.setHfov(hfov, 0);
+
+
+            }
+            break;
+        
+        case "uk": 
+            {
+                let tmp = index - 1;  
+                index = (tmp + 1) % length == 0 ? index: tmp;
+                h++;
+                tmp = index + area;
+                if (h < height) index = tmp;
+                else h = height -1;
+                viewer.loadScene(`${index}`);
+                viewer.setPitch(pitch, 0);
+                viewer.setYaw(yaw, 0);
+                viewer.setHfov(hfov, 0);
+
+            }
+            break;
+        
+        case "ul":
+            {
+                let tmp = index + length;
+                index = tmp >= ( h + 1) * area ? index: tmp;
+                h++;
+                tmp = index + area;
+                if (h < height) index = tmp;
+                else h = height -1;
+                viewer.loadScene(`${index}`);
+                viewer.setPitch(pitch, 0);
+                viewer.setYaw(yaw, 0);
+                viewer.setHfov(hfov, 0);
+
+            } 
+            break; 
+
+        case "hj":
+            {
+
+                let tmp = index - length;
+                index = tmp < h * area ? index: tmp;  
+                h--;
+                tmp = index - area;
+                if (h < 0) h = 0;
+                else index = tmp;
+                viewer.loadScene(`${index}`);
+                viewer.setPitch(pitch, 0);
+                viewer.setYaw(yaw, 0);
+                viewer.setHfov(hfov, 0);
+
+
+            }
+            break;
+
+        case "hl":
+
+            {
+                let tmp = index + length;
+                index = tmp >= ( h + 1) * area ? index: tmp;
+                h--;
+                tmp = index - area;
+                if (h < 0) h = 0;
+                else index = tmp;
+                viewer.loadScene(`${index}`);
+                viewer.setPitch(pitch, 0);
+                viewer.setYaw(yaw, 0);
+                viewer.setHfov(hfov, 0);
+
+
+            }
+            break;
+        
+        case "uj": 
+            {
+                let tmp = index + length;
+                index = tmp >= ( h + 1) * area ? index: tmp;
+                h++;
+                tmp = index + area;
+                if (h < height) index = tmp;
+                else h = height -1;
+                viewer.loadScene(`${index}`);
+                viewer.setPitch(pitch, 0);
+                viewer.setYaw(yaw, 0);
+                viewer.setHfov(hfov, 0);
+
+
+
+            }
+            break;
+
+        case "uli":
+            {
+
+                let tmp = index + length;
+                index = tmp >= ( h + 1) * area ? index: tmp;
+                tmp = index + 1;  
+                index = tmp % length == 0 ? index: tmp;
+                h++;
+                tmp = index + area;
+                if (h < height) index = tmp;
+                else h = height -1;
+                viewer.loadScene(`${index}`);
+                viewer.setPitch(pitch, 0);
+                viewer.setYaw(yaw, 0);
+                viewer.setHfov(hfov, 0);
+
+
+            }
+            break;
+
+        case "hjk":
+            {
+
+                let tmp = index - length;
+                index = tmp < h * area ? index: tmp; 
+                tmp = index - 1;  
+                index = (tmp + 1) % length == 0 ? index: tmp;
+                h--;
+                tmp = index - area;
+                if (h < 0) h = 0;
+                else index = tmp;
+                viewer.loadScene(`${index}`);
+                viewer.setPitch(pitch, 0);
+                viewer.setYaw(yaw, 0);
+                viewer.setHfov(hfov, 0);
+
+            }
+            break;
+        
+        case "hli":
+            {
+                let tmp = index + length;
+                index = tmp >= ( h + 1) * area ? index: tmp;
+                tmp = index + 1;  
+                index = tmp % length == 0 ? index: tmp;
+                h--;
+                tmp = index - area;
+                if (h < 0) h = 0;
+                else index = tmp;
+
+                viewer.loadScene(`${index}`);
+                viewer.setPitch(pitch, 0);
+                viewer.setYaw(yaw, 0);
+                viewer.setHfov(hfov, 0);
+
+
+            }
+            break;
+
+        case "ujk":
+            {
+
+                let tmp = index - length;
+                index = tmp < h * area ? index: tmp; 
+                tmp = index - 1;  
+                index = (tmp + 1) % length == 0 ? index: tmp;
+                h++;
+                tmp = index + area;
+                if (h < height) index = tmp;
+                else h = height -1;
+                viewer.loadScene(`${index}`);
+                viewer.setPitch(pitch, 0);
+                viewer.setYaw(yaw, 0);
+                viewer.setHfov(hfov, 0);
+
+            }
+            break;
+        
+        
+        case "ukl":
+            {
+                let tmp = index + length;
+                index = tmp >= ( h + 1) * area ? index: tmp;
+                tmp = index - 1;  
+                index = (tmp + 1) % length == 0 ? index: tmp;
+                h++;
+                tmp = index + area;
+                if (h < height) index = tmp;
+                else h = height -1;
+                viewer.loadScene(`${index}`);
+                viewer.setPitch(pitch, 0);
+                viewer.setYaw(yaw, 0);
+                viewer.setHfov(hfov, 0);
+
+
+
+            }
+            break;
+        
+        case "hij":
+
+            {
+                let tmp = index - length;
+                index = tmp < h * area ? index: tmp; 
+                tmp = index + 1;  
+                index = tmp % length == 0 ? index: tmp;
+                h--;
+                tmp = index - area;
+                if (h < 0) h = 0;
+                else index = tmp;
+                viewer.loadScene(`${index}`);
+                viewer.setPitch(pitch, 0);
+                viewer.setYaw(yaw, 0);
+                viewer.setHfov(hfov, 0);
+
+            }
+            break;
+
+        case "hkl":
+
+            {
+                let tmp = index + length;
+                index = tmp >= ( h + 1) * area ? index: tmp;
+                tmp = index - 1;  
+                index = (tmp + 1) % length == 0 ? index: tmp;
+                h--;
+                tmp = index - area;
+                if (h < 0) h = 0;
+                else index = tmp;
+                viewer.loadScene(`${index}`);
+                viewer.setPitch(pitch, 0);
+                viewer.setYaw(yaw, 0);
+                viewer.setHfov(hfov, 0);
+
+            }
+            break;
+
+        case "uij" : 
+            {
+                let tmp = index - length;
+                index = tmp < h * area ? index: tmp; 
+                tmp = index + 1;  
+                index = tmp % length == 0 ? index: tmp;
+                h++;
+                tmp = index + area;
+                if (h < height) index = tmp;
+                else h = height -1;
+                viewer.loadScene(`${index}`);
+                viewer.setPitch(pitch, 0);
+                viewer.setYaw(yaw, 0);
+                viewer.setHfov(hfov, 0);
+            }
             break;
 
         case "ArrowUp":
@@ -244,7 +599,7 @@ window.addEventListener( 'mousemove', function (event){
     pitch = viewer.getPitch();
     yaw = viewer.getYaw();
    
-  //  console.log(pitch, yaw, hfov);
+ //  console.log(pitch, yaw);
 
 
 }, false );
@@ -267,68 +622,153 @@ document.getElementById('pan-right').addEventListener('click', function(e) {
      window.dispatchEvent(new KeyboardEvent('keydown', {'key': 'l'}));
 });
 
+
 function findKey(pitch, yaw, key) {
     
+    key =  key.replace(/\ı/g, "i");
 
-    if (pitch > pitch_thres && !(yaw > yaw_thres || yaw < -yaw_thres)  )   {
-        if (key=="i") key = "u";
+    if (!(pitch > pitch_thres || pitch < -pitch_thres) && !(yaw > yaw_thres || yaw < -yaw_thres)) {
+        
+
+    } else if (pitch > pitch_thres && !(yaw > yaw_thres || yaw < -yaw_thres)  )   {
+        if (key=="i") key = "ui";
         else if (key=="j") key = "j";
-        else if (key=="k") key = "h";
+        else if (key=="k") key = "hk";
         else if (key=="l") key = "l";
     } else if (pitch < -pitch_thres && !(yaw > yaw_thres || yaw < -yaw_thres)  )   {
-        if (key=="i") key = "h";
+        if (key=="i") key = "hi";
         else if (key=="j") key = "j";
-        else if (key=="k") key = "u";
+        else if (key=="k") key = "uk";
         else if (key=="l") key = "l";
-    } else if (!(pitch > pitch_thres || pitch < -pitch_thres) && (yaw > yaw_thres && yaw < 3*yaw_thres) ) {
+    } 
+    
+    else if (!(pitch > pitch_thres || pitch < -pitch_thres) && (yaw > yaw_thres && yaw < 3*yaw_thres) ){
+        if (key=="i") key = "li";
+        else if (key=="j") key = "ij";
+        else if (key=="k") key = "jk";
+        else if (key=="l") key = "kl";
+    } else if ( pitch > pitch_thres && (yaw > yaw_thres && yaw < 3*yaw_thres) ) {
+        if (key=="i") key = "uli";
+        else if (key=="j") key = "ij";
+        else if (key=="k") key = "hjk";
+        else if (key=="l") key = "kl";
+    } else if ( pitch < -pitch_thres && (yaw > yaw_thres && yaw < 3*yaw_thres) ) {
+        if (key=="i") key = "hli";
+        else if (key=="j") key = "ij";
+        else if (key=="k") key = "ujk";
+        else if (key=="l") key = "kl";
+    }
+    
+    else if (!(pitch > pitch_thres || pitch < -pitch_thres) && (yaw > 3*yaw_thres && yaw < 5*yaw_thres) ) {
         if (key=="i") key = "l";
         else if (key=="j") key = "i";
         else if (key=="k") key = "j";
         else if (key=="l") key = "k";
-    } else if ( pitch > pitch_thres && (yaw > yaw_thres && yaw < 3*yaw_thres) ) {
-        if (key=="i") key = "u";
+    } else if ( pitch > pitch_thres && (yaw > 3*yaw_thres && yaw < 5*yaw_thres) ) {
+        if (key=="i") key = "ul";
         else if (key=="j") key = "i";
-        else if (key=="k") key = "h";
+        else if (key=="k") key = "hj";
         else if (key=="l") key = "k";
-    } else if ( pitch < -pitch_thres && (yaw > yaw_thres && yaw < 3*yaw_thres) ) {
-        if (key=="i") key = "h";
+    } else if ( pitch < -pitch_thres && (yaw > 3*yaw_thres && yaw < 5*yaw_thres) ) {
+        if (key=="i") key = "hl";
         else if (key=="j") key = "i";
-        else if (key=="k") key = "u";
+        else if (key=="k") key = "uj";
         else if (key=="l") key = "k";
-    } else if (!(pitch > pitch_thres || pitch < -pitch_thres) && (yaw < -yaw_thres && yaw > -3*yaw_thres) ) {
-        if (key=="i") key = "j";
-        else if (key=="j") key = "k";
-        else if (key=="k") key = "l";
-        else if (key=="l") key = "i";
-    }else if (pitch > pitch_thres  && (yaw < -yaw_thres && yaw > -3*yaw_thres) ) {
-        if (key=="i") key = "u";
-        else if (key=="j") key = "k";
-        else if (key=="k") key = "h";
-        else if (key=="l") key = "i";
-    }else if (pitch < -pitch_thres  && (yaw < -yaw_thres && yaw > -3*yaw_thres) ) {
-        if (key=="i") key = "h";
-        else if (key=="j") key = "k";
-        else if (key=="k") key = "u";
-        else if (key=="l") key = "i";
-    }else if ( !(pitch > pitch_thres || pitch < -pitch_thres) && (yaw > 3*yaw_thres || yaw < -3*yaw_thres)) {
+    } 
+    
+    else if (!(pitch > pitch_thres || pitch < -pitch_thres) && (yaw > 5*yaw_thres && yaw < 7*yaw_thres) ) {
+        if (key=="i") key = "kl";
+        else if (key=="j") key = "li";
+        else if (key=="k") key = "ij";
+        else if (key=="l") key = "jk";
+
+    } else if (pitch > pitch_thres  && (yaw > 5*yaw_thres && yaw < 7*yaw_thres)) {
+        if (key=="i") key = "ukl";
+        else if (key=="j") key = "li";
+        else if (key=="k") key = "hij";
+        else if (key=="l") key = "jk";
+    }  else if (pitch < -pitch_thres  && (yaw > 5*yaw_thres && yaw < 7*yaw_thres)) {
+        if (key=="i") key = "hkl";
+        else if (key=="j") key = "li";
+        else if (key=="k") key = "uij";
+        else if (key=="l") key = "jk";
+
+    } 
+    
+    else if ( !(pitch > pitch_thres || pitch < -pitch_thres) && (yaw > 7*yaw_thres || yaw < -7*yaw_thres)) {
         if (key=="i") key = "k";
         else if (key=="j") key = "l";
         else if (key=="k") key = "i";
         else if (key=="l") key = "j";
-    }else if ( pitch > pitch_thres  && (yaw > 3*yaw_thres || yaw < -3*yaw_thres)) {
-        if (key=="i") key = "u";
+    } else if (pitch > pitch_thres  && (yaw > 7*yaw_thres || yaw < -7*yaw_thres)) {
+        if (key=="i") key = "uk";
         else if (key=="j") key = "l";
-        else if (key=="k") key = "h";
+        else if (key=="k") key = "hi";
         else if (key=="l") key = "j";
-    }else if (  pitch < -pitch_thres && (yaw > 3*yaw_thres || yaw < -3*yaw_thres)) {
-        if (key=="i") key = "h";
+    } else if (pitch < -pitch_thres  && (yaw > 7*yaw_thres || yaw < -7*yaw_thres)) {
+        if (key=="i") key = "hk";
         else if (key=="j") key = "l";
-        else if (key=="k") key = "u";
+        else if (key=="k") key = "ui";
         else if (key=="l") key = "j";
     }
+
+    else if ( !(pitch > pitch_thres || pitch < -pitch_thres) && (yaw < -5*yaw_thres && yaw > -7*yaw_thres)) {
+        if (key=="i") key = "jk";
+        else if (key=="j") key = "kl";
+        else if (key=="k") key = "li";
+        else if (key=="l") key = "ij";
+    } else if (pitch > pitch_thres  && (yaw < -5*yaw_thres && yaw > -7*yaw_thres)){
+        if (key=="i") key = "ujk";
+        else if (key=="j") key = "kl";
+        else if (key=="k") key = "hli";
+        else if (key=="l") key = "ij";
+    } else if (pitch < -pitch_thres  && (yaw < -5*yaw_thres && yaw > -7*yaw_thres)){
+        if (key=="i") key = "hjk";
+        else if (key=="j") key = "kl";
+        else if (key=="k") key = "uli";
+        else if (key=="l") key = "ij";
+    }
+
+    else if ( !(pitch > pitch_thres || pitch < -pitch_thres) && (yaw < -3*yaw_thres && yaw > -5*yaw_thres)) {
+        if (key=="i") key = "j";
+        else if (key=="j") key = "k";
+        else if (key=="k") key = "l";
+        else if (key=="l") key = "i";
+    } else if (pitch > pitch_thres  && (yaw < -3*yaw_thres && yaw > -5*yaw_thres)) {
+        if (key=="i") key = "uj";
+        else if (key=="j") key = "k";
+        else if (key=="k") key = "hl";
+        else if (key=="l") key = "i";
+    } else if (pitch < -pitch_thres  && (yaw < -3*yaw_thres && yaw > -5*yaw_thres)) {
+        if (key=="i") key = "hj";
+        else if (key=="j") key = "k";
+        else if (key=="k") key = "ul";
+        else if (key=="l") key = "i";
+    }
+
+    else if ( !(pitch > pitch_thres || pitch < -pitch_thres) && (yaw < -yaw_thres && yaw > -3*yaw_thres)) {
+        if (key=="i") key = "ij";
+        else if (key=="j") key = "jk";
+        else if (key=="k") key = "kl";
+        else if (key=="l") key = "li";
+    } else if (pitch > pitch_thres  && (yaw < -yaw_thres && yaw > -3*yaw_thres)) {
+        if (key=="i") key = "uij";
+        else if (key=="j") key = "jk";
+        else if (key=="k") key = "hkl";
+        else if (key=="l") key = "li";
+    } else if (pitch < -pitch_thres  && (yaw < -yaw_thres && yaw > -3*yaw_thres)) {
+        if (key=="i") key = "hij";
+        else if (key=="j") key = "jk";
+        else if (key=="k") key = "ukl";
+        else if (key=="l") key = "li";
+
+    }
+   
     return key;
 
 }
+
+
 </script>
 
 </body>
