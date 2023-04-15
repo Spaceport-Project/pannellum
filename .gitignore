@@ -12,3 +12,13 @@ utils/doc/generated_docs
 
 # Ignore logs
 tests/*.log
+node_modules
+
+
+
+#ignore media Files
+examples/media
+paper
+
+
+cert.pem

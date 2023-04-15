@@ -449,6 +449,171 @@ function init() {
     }
 }
 
+function init2(img) {
+    // Display an error for IE 9 as it doesn't work but also doesn't otherwise
+    // show an error (older versions don't work at all)
+    // Based on: http://stackoverflow.com/a/10965203
+    var div = document.createElement("div");
+    div.innerHTML = "<!--[if lte IE 9]><i></i><![endif]-->";
+    if (div.getElementsByTagName("i").length == 1) {
+        anError();
+        return;
+    }
+
+    origHfov = config.hfov;
+    origPitch = config.pitch;
+
+    var i, p;
+    
+    if (config.type == 'cubemap') {
+        panoImage = [];
+        for (i = 0; i < 6; i++) {
+            panoImage.push(new Image());
+            panoImage[i].crossOrigin = config.crossOrigin;
+        }
+        infoDisplay.load.lbox.style.display = 'block';
+        infoDisplay.load.lbar.style.display = 'none';
+    } else if (config.type == 'multires') {
+        var c = JSON.parse(JSON.stringify(config.multiRes));    // Deep copy
+        // Avoid "undefined" in path, check (optional) multiRes.basePath, too
+        // Use only multiRes.basePath if it's an absolute URL
+        if (config.basePath && config.multiRes.basePath &&
+            !(/^(?:[a-z]+:)?\/\//i.test(config.multiRes.basePath))) {
+            c.basePath = config.basePath + config.multiRes.basePath;
+        } else if (config.multiRes.basePath) {
+            c.basePath = config.multiRes.basePath;
+        } else if(config.basePath) {
+            c.basePath = config.basePath;
+        }
+        panoImage = c;
+    } else {
+        if (config.dynamic === true) {
+            panoImage = config.panorama;
+        } else {
+            if (config.panorama === undefined) {
+                anError(config.strings.noPanoramaError);
+                return;
+            }
+            panoImage = new Image();
+        }
+    }
+
+    // Configure image loading
+    if (config.type == 'cubemap') {
+        // Quick loading counter for synchronous loading
+        var itemsToLoad = 6;
+        
+        var onLoad = function() {
+            itemsToLoad--;
+            if (itemsToLoad === 0) {
+                onImageLoad();
+            }
+        };
+        
+        var onError = function(e) {
+            var a = document.createElement('a');
+            a.href = e.target.src;
+            a.textContent = a.href;
+            anError(config.strings.fileAccessError.replace('%s', a.outerHTML));
+        };
+        
+        for (i = 0; i < panoImage.length; i++) {
+            p = config.cubeMap[i];
+            if (p == "null") { // support partial cubemap image with explicitly empty faces
+                console.log('Will use background instead of missing cubemap face ' + i);
+                onLoad();
+            } else {
+                if (config.basePath && !absoluteURL(p)) {
+                    p = config.basePath + p;
+                }
+                panoImage[i].onload = onLoad;
+                panoImage[i].onerror = onError;
+                panoImage[i].src = sanitizeURL(p);
+            }
+        }
+    } else if (config.type == 'multires') {
+        onImageLoad();
+    } else {
+       
+        
+        if (config.dynamic !== true) {
+            // Still image
+            // p = absoluteURL(config.panorama) ? config.panorama : p + config.panorama;
+            
+            panoImage.onload = function() {
+                window.URL.revokeObjectURL(this.src);  // Clean up
+                onImageLoad();
+            };
+            parseGPanoXMP(img);
+            infoDisplay.load.msg.innerHTML = '';
+
+            // var xhr = new XMLHttpRequest();
+            // xhr.onloadend = function() {
+            //     if (xhr.status != 200) {
+            //         // Display error if image can't be loaded
+            //         var a = document.createElement('a');
+            //         a.href = p;
+            //         a.textContent = a.href;
+            //         anError(config.strings.fileAccessError.replace('%s', a.outerHTML));
+            //     }
+            //     var img = this.response;
+            //     parseGPanoXMP(img);
+            //     infoDisplay.load.msg.innerHTML = '';
+            // };
+            // xhr.onprogress = function(e) {
+            //     if (e.lengthComputable) {
+            //         // Display progress
+            //         var percent = e.loaded / e.total * 100;
+            //         infoDisplay.load.lbarFill.style.width = percent + '%';
+            //         var unit, numerator, denominator;
+            //         if (e.total > 1e6) {
+            //             unit = 'MB';
+            //             numerator = (e.loaded / 1e6).toFixed(2);
+            //             denominator = (e.total / 1e6).toFixed(2);
+            //         } else if (e.total > 1e3) {
+            //             unit = 'kB';
+            //             numerator = (e.loaded / 1e3).toFixed(1);
+            //             denominator = (e.total / 1e3).toFixed(1);
+            //         } else {
+            //             unit = 'B';
+            //             numerator = e.loaded;
+            //             denominator = e.total;
+            //         }
+            //         infoDisplay.load.msg.innerHTML = numerator + ' / ' + denominator + ' ' + unit;
+            //     } else {
+            //         // Display loading spinner
+            //         infoDisplay.load.lbox.style.display = 'block';
+            //         infoDisplay.load.lbar.style.display = 'none';
+            //     }
+            // };
+            // try {
+            //     xhr.open('GET', p, true);
+            // } catch (e) {
+            //     // Malformed URL
+            //     anError(config.strings.malformedURLError);
+            // }
+            // xhr.responseType = 'blob';
+            // xhr.setRequestHeader('Accept', 'image/*,*/*;q=0.9');
+            // xhr.withCredentials = config.crossOrigin === 'use-credentials';
+            // xhr.send();
+        }
+    }
+    
+    if (config.draggable)
+        uiContainer.classList.add('pnlm-grab');
+    uiContainer.classList.remove('pnlm-grabbing');
+
+    // Properly handle switching to dynamic scenes
+    update = config.dynamicUpdate === true;
+    if (config.dynamic && update) {
+        panoImage = config.panorama;
+        onImageLoad();
+    }
+}
+
+
+
+
 /**
  * Test if URL is absolute or relative.
  * @private
@@ -596,7 +761,37 @@ function parseGPanoXMP(image) {
         }
         
         // Load panorama
-        panoImage.src = window.URL.createObjectURL(image);
+       
+           panoImage.src = window.URL.createObjectURL(image);
+           panoImage.onerror = function() {
+            // If the image fails to load, we check the Content Security Policy
+            // headers and see if they block loading images as blobs. If they
+            // do, we load the image directly from the URL. While this should
+            // allow the image to load, it does prevent parsing of XMP data.
+            function getCspHeaders() {
+                if (!window.fetch)
+                    return null;
+                return window.fetch(document.location.href)
+                    .then(function(resp){
+                        return resp.headers.get('Content-Security-Policy');
+                    });
+            }
+            getCspHeaders().then(function(cspHeaders) {
+                if (cspHeaders) {
+                    var invalidImgSource = cspHeaders.split(";").find(function(p) {
+                        var matchstring = p.match(/img-src(.*)/);
+                        if (matchstring) {
+                            return !matchstring[1].includes("blob");
+                        }
+                    });
+                    if (invalidImgSource) {
+                        console.log('CSP blocks blobs; reverting to URL.');
+                        panoImage.crossOrigin = config.crossOrigin;
+                        panoImage.src = url;
+                    }
+                }
+            });
+        }
     });
     if (reader.readAsBinaryString !== undefined)
         reader.readAsBinaryString(image);
@@ -2248,6 +2443,28 @@ function load() {
     init();
 }
 
+function load2(img) {
+    // Since WebGL error handling is very general, first we clear any error box
+    // since it is a new scene and the error from previous maybe because of lacking
+    // memory etc and not because of a lack of WebGL support etc
+    clearError();
+    loaded = false;
+
+    controls.load.style.display = 'none';
+    infoDisplay.load.box.style.display = 'inline';
+    init2(img);
+}
+
+this.load = function () {
+    load();
+}
+
+this.load2 = function (img) {
+    load2(img);
+}
+
+
+
 /**
  * Loads scene.
  * @private
@@ -2325,6 +2542,80 @@ function loadScene(sceneId, targetPitch, targetYaw, targetHfov, fadeDone) {
     fireEvent('scenechange', sceneId);
     load();
 }
+
+
+function loadScene2(img, targetPitch, targetYaw, targetHfov, fadeDone) {
+    if (!loaded)
+        fadeDone = true;    // Don't try to fade when there isn't a scene loaded
+    loaded = false;
+    animatedMove = {};
+    
+    // Set up fade if specified
+    var fadeImg, workingPitch, workingYaw, workingHfov;
+    if (config.sceneFadeDuration && !fadeDone) {
+        var data = renderer.render(config.pitch * Math.PI / 180, config.yaw * Math.PI / 180, config.hfov * Math.PI / 180, {returnImage: true});
+        if (data !== undefined) {
+            fadeImg = new Image();
+            fadeImg.className = 'pnlm-fade-img';
+            fadeImg.style.transition = 'opacity ' + (config.sceneFadeDuration / 1000) + 's';
+            fadeImg.style.width = '100%';
+            fadeImg.style.height = '100%';
+            fadeImg.onload = function() {
+                loadScene(sceneId, targetPitch, targetYaw, targetHfov, true);
+            };
+            fadeImg.src = data;
+            renderContainer.appendChild(fadeImg);
+            renderer.fadeImg = fadeImg;
+            return;
+        }
+    }
+    
+    // Set new pointing
+    if (targetPitch === 'same') {
+        workingPitch = config.pitch;
+    } else {
+        workingPitch = targetPitch;
+    }
+    if (targetYaw === 'same') {
+        workingYaw = config.yaw;
+    } else if (targetYaw === 'sameAzimuth') {
+        workingYaw = config.yaw + (config.northOffset || 0) - (initialConfig.scenes[Object.keys(img)[0]].northOffset || 0);
+    } else {
+        workingYaw = targetYaw;
+    }
+    if (targetHfov === 'same') {
+        workingHfov = config.hfov;
+    } else {
+        workingHfov = targetHfov;
+    }
+    
+    // Destroy hot spots from previous scene
+    destroyHotSpots();
+    
+    // Create the new config for the scene
+    mergeConfig(Object.keys(img)[0]);
+
+    // Stop motion
+    speed.yaw = speed.pitch = speed.hfov = 0;
+
+    // Reload scene
+    processOptions();
+    if (workingPitch !== undefined) {
+        config.pitch = workingPitch;
+    }
+    if (workingYaw !== undefined) {
+        config.yaw = workingYaw;
+    }
+    if (workingHfov !== undefined) {
+        config.hfov = workingHfov;
+    }
+    fireEvent('scenechange', Object.keys(img)[0]);
+    //console.log("value:", Object.values(img)[0]);
+    load2(Object.values(img)[0]);
+}
+
+
+
 
 /**
  * Stop using device orientation.
@@ -2850,6 +3141,13 @@ this.loadScene = function(sceneId, pitch, yaw, hfov) {
     if (loaded !== false)
         loadScene(sceneId, pitch, yaw, hfov);
     return this;
+};
+
+this.loadScene2 = function (img, pitch, yaw, hfov) {
+    if (loaded !== false)
+        loadScene2(img, pitch, yaw, hfov);
+    return this;
+
 };
 
 /**

@@ -1,0 +1,767 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Pannellum Video Demo</title>
+    <!-- <link rel="stylesheet" href="https://cdn.pannellum.org/2.5/pannellum.css"/> -->
+    <link rel="stylesheet" href="/src/css/pannellum.css">
+    
+    <style>
+
+   
+
+    </style>
+    
+    
+    <script type="text/javascript" src="https://cdn.pannellum.org/2.5/pannellum.js"></script>
+    <!-- <link href="http://vjs.zencdn.net/5.17.0/video-js.css" rel="stylesheet"> -->
+    <!-- <link href="https://vjs.zencdn.net/8.0.4/video-js.css" rel="stylesheet" /> -->
+
+    <link href="/src/css/video-js.css" rel="stylesheet"
+      type="text/css">
+    <script    src="/src/js/video.js"></script>
+    <!-- <script type="text/javascript" src="http://vjs.zencdn.net/5.17.0/video.js"></script> -->
+    <!-- <script src="https://vjs.zencdn.net/8.0.4/video.min.js"></script> -->
+
+    <script src="/src/js/videojs-pannellum-plugin.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+
+</head>
+<body>
+
+<video id="panorama" class="video-js vjs-big-play-centered " controls="" preload="auto" autoplay="true"
+width="1900px" height= "900px" crossorigin="anonymous" >
+    <source src="./media/dynamic_grid_6x2/vidh264_0.mp4" type="video/mp4" />
+    <p class="vjs-no-js">
+        To view this video please enable JavaScript, and consider upgrading to
+        a web browser that <a href="http://videojs.com/html5-video-support/"
+        target="_blank">supports HTML5 video</a>
+    </p>
+</video>
+
+<script>
+// var videojs = require('video.js');
+// require('videojs-rotate-player-plugin');
+
+const pitch_thres = 180/6;
+const yaw_thres = 180/8;
+const length = 4;
+const width = 1;
+const height = 1;
+const area = length * width;
+const volume = length * width * height;
+var index = 0;
+var basepath = "/examples/media/dynamic_grid_6x2"
+var h = Math.floor(index / area);
+var pitch = 0, yaw = 0, hfov = 100;
+
+ var prev = document.getElementById("panorama");
+ prev.style.display = "block";
+// var clone = prev.cloneNode(true);
+// clone.id = 'panorama1';
+// clone.getElementsByTagName("source")[0].src="./dynamic_grid_6x2/vid_0.mp4";
+// clone.style.display="block";
+// document.body.appendChild(clone);
+// var vid = videojs('panorama', {
+    
+//     plugins: {
+//         pannellum: {},
+       
+//     }
+// });
+
+var vid;
+//vid.rotatePlayerPlugin();
+
+// setTimeout(()=>{
+//     document.getElementById("panorama1").style.display="none";
+//     vid.pnlmViewer.destroy();
+//     vid.dispose();
+//     document.getElementById("panorama").style.display="block";
+//     let v1 = videojs('panorama', {
+        
+//             controls: true,
+//             autoplay: true,
+//             preload: 'auto',
+        
+   
+//     plugins: {
+//         pannellum: {}
+//     },
+  
+
+//     });  
+  
+//     v1.pnlmViewer.setPitch(70);
+//     var pitch = v1.pnlmViewer.getPitch();
+
+//     console.log(pitch);
+     
+
+//     }, 5000);
+
+function createVideoDOMElements(){
+
+    for (let i = 0; i < volume; i++) {
+
+        let elem = document.getElementById("panorama");
+        elem.style.display = "none";
+        let clone = elem.cloneNode(true);
+        clone.id = `panorama_${i}`;
+        clone.getElementsByTagName("source")[0].src=`${basepath}/vidh264_${i}.mp4`;
+       // clone.style.display="block";
+        document.body.appendChild(clone);
+      
+
+    }
+
+}
+
+function createSingleVideoDOMElement(ind) {
+
+    let elem = document.getElementById("panorama");
+    elem.style.display = "none";
+    let clone = elem.cloneNode(true);
+    clone.id = `panorama_${ind}`;
+    clone.getElementsByTagName("source")[0].src=`./media/360videos/vid_${ind}.mp4`;
+    // clone.getElementsByTagName("source")[0].src=`dynamic_grid_6x2/vidh264_${ind}.mp4`;
+    // clone.style.display="block";
+    document.body.appendChild(clone);
+    return clone;
+}
+
+function play360Video(ind, currentTime){
+    prev.style.display="none";
+    var curr= document.getElementById(`panorama_${ind}`);
+    if (vid && !curr  ) { 
+        vid.pnlmViewer.destroy();
+        vid.dispose();
+        curr=createSingleVideoDOMElement(ind);
+    }
+ 
+    if (vid && curr && curr.id === prev.id) {
+        prev.style.display="block";
+        prev=document.getElementById(`panorama_${ind}`);
+        
+        return ;
+    } 
+    
+    curr.style.display="block";
+    vid = videojs(`panorama_${ind}`, {
+           
+            plugins: {
+                pannellum: {}
+            }
+    });
+    vid.currentTime(currentTime);
+    vid.play();
+    prev=document.getElementById(`panorama_${ind}`);
+   
+}
+
+createSingleVideoDOMElement(index);
+play360Video(index, currentTime=0);
+//setTimeout(()=> {play360Video(7);}, 12000);
+
+window.addEventListener('keydown', function(event) {
+
+//  console.log(pitch, yaw);
+
+  var key = findKey(pitch, yaw, event.key);
+  console.log(key);
+
+  switch (key) {
+      case "j":
+          {               
+              
+              const tmp = index - length;
+              index = tmp < h * area ? index: tmp; 
+              
+
+          } 
+              
+          break;
+
+      case "l":
+          {
+              const tmp = index + length;
+              index = tmp >= ( h + 1) * area ? index: tmp;
+            
+          }
+
+          break;
+
+      case "i":
+          {
+              const tmp = index + 1;  
+              index = tmp % length == 0 ? index: tmp;
+             
+             
+          }
+          break;
+
+      case "k":
+          {
+              const tmp = index - 1;  
+              index = (tmp + 1) % length == 0 ? index: tmp;
+             
+       
+          }
+
+          break;
+
+      case "u":
+          {
+              h++;
+              const tmp = index + area;
+              if (h < height) index = tmp;
+              else h = height -1;
+              
+          
+          }
+          break;
+
+      case "h":
+          {
+              h--;
+              const tmp = index - area;
+              if (h < 0) h = 0;
+              else index = tmp;
+              
+
+
+          }
+
+          break;
+
+      case "li":
+          {
+              let tmp = index + length;
+              index = tmp >= ( h + 1) * area ? index: tmp;
+              tmp = index + 1;  
+              index = tmp % length == 0 ? index: tmp;
+              
+
+
+          }
+          break;
+
+      case "ij":
+          {
+              let tmp = index - length;
+              index = tmp < h * area ? index: tmp; 
+              tmp = index + 1;  
+              index = tmp % length == 0 ? index: tmp;
+        
+              
+          }
+          break;
+
+      case "jk": 
+          {
+              let tmp = index - length;
+              index = tmp < h * area ? index: tmp; 
+              tmp = index - 1;  
+              index = (tmp + 1) % length == 0 ? index: tmp;
+            
+
+          }
+          break;
+
+      case "kl":
+          {
+
+              let tmp = index + length;
+              index = tmp >= ( h + 1) * area ? index: tmp;
+              tmp = index - 1;  
+              index = (tmp + 1) % length == 0 ? index: tmp;
+             
+
+          }
+          break;
+
+      case "ui":
+          {
+              
+              
+              let tmp = index + 1;  
+              index = tmp % length == 0 ? index: tmp;
+              h++;
+              tmp = index + area;
+              if (h < height) index = tmp;
+              else h = height -1;
+        
+
+
+          }
+          break;
+      
+      case "hk":
+          {
+              let tmp = index - 1;  
+              index = (tmp + 1) % length == 0 ? index: tmp;
+              h--;
+              tmp = index - area;
+              if (h < 0) h = 0;
+              else index = tmp;
+        
+
+
+
+          }
+          break;
+
+      case "hi":
+          {
+              
+              let tmp = index + 1;  
+              index = tmp % length == 0 ? index: tmp;
+              h--;
+              tmp = index - area;
+              if (h < 0) h = 0;
+              else index = tmp;
+         
+
+          }
+          break;
+      
+      case "uk": 
+          {
+              let tmp = index - 1;  
+              index = (tmp + 1) % length == 0 ? index: tmp;
+              h++;
+              tmp = index + area;
+              if (h < height) index = tmp;
+              else h = height -1;
+           
+
+          }
+          break;
+      
+      case "ul":
+          {
+              let tmp = index + length;
+              index = tmp >= ( h + 1) * area ? index: tmp;
+              h++;
+              tmp = index + area;
+              if (h < height) index = tmp;
+              else h = height -1;
+          
+
+          } 
+          break; 
+
+      case "hj":
+          {
+
+              let tmp = index - length;
+              index = tmp < h * area ? index: tmp;  
+              h--;
+              tmp = index - area;
+              if (h < 0) h = 0;
+              else index = tmp;
+           
+
+          }
+          break;
+
+      case "hl":
+
+          {
+              let tmp = index + length;
+              index = tmp >= ( h + 1) * area ? index: tmp;
+              h--;
+              tmp = index - area;
+              if (h < 0) h = 0;
+              else index = tmp;
+            
+
+          }
+          break;
+      
+      case "uj": 
+          {
+              let tmp = index - length;
+              index = tmp < h * area ? index: tmp; 
+              h++;
+              tmp = index + area;
+              if (h < height) index = tmp;
+              else h = height -1;
+            
+          }
+          break;
+
+      case "uli":
+          {
+
+              let tmp = index + length;
+              index = tmp >= ( h + 1) * area ? index: tmp;
+              tmp = index + 1;  
+              index = tmp % length == 0 ? index: tmp;
+              h++;
+              tmp = index + area;
+              if (h < height) index = tmp;
+              else h = height -1;
+        
+          }
+          break;
+
+      case "hjk":
+          {
+
+              let tmp = index - length;
+              index = tmp < h * area ? index: tmp; 
+              tmp = index - 1;  
+              index = (tmp + 1) % length == 0 ? index: tmp;
+              h--;
+              tmp = index - area;
+              if (h < 0) h = 0;
+              else index = tmp;
+         
+          }
+          break;
+      
+      case "hli":
+          {
+              let tmp = index + length;
+              index = tmp >= ( h + 1) * area ? index: tmp;
+              tmp = index + 1;  
+              index = tmp % length == 0 ? index: tmp;
+              h--;
+              tmp = index - area;
+              if (h < 0) h = 0;
+              else index = tmp;
+
+          }
+          break;
+
+      case "ujk":
+          {
+
+              let tmp = index - length;
+              index = tmp < h * area ? index: tmp; 
+              tmp = index - 1;  
+              index = (tmp + 1) % length == 0 ? index: tmp;
+              h++;
+              tmp = index + area;
+              if (h < height) index = tmp;
+              else h = height -1;
+         
+          }
+          break;
+      
+      
+      case "ukl":
+          {
+              let tmp = index + length;
+              index = tmp >= ( h + 1) * area ? index: tmp;
+              tmp = index - 1;  
+              index = (tmp + 1) % length == 0 ? index: tmp;
+              h++;
+              tmp = index + area;
+              if (h < height) index = tmp;
+              else h = height -1;
+            
+          }
+          break;
+      
+      case "hij":
+
+          {
+              let tmp = index - length;
+              index = tmp < h * area ? index: tmp; 
+              tmp = index + 1;  
+              index = tmp % length == 0 ? index: tmp;
+              h--;
+              tmp = index - area;
+              if (h < 0) h = 0;
+              else index = tmp;
+           
+
+          }
+          break;
+
+      case "hkl":
+
+          {
+              let tmp = index + length;
+              index = tmp >= ( h + 1) * area ? index: tmp;
+              tmp = index - 1;  
+              index = (tmp + 1) % length == 0 ? index: tmp;
+              h--;
+              tmp = index - area;
+              if (h < 0) h = 0;
+              else index = tmp;
+         
+
+          }
+          break;
+
+      case "uij" : 
+          {
+              let tmp = index - length;
+              index = tmp < h * area ? index: tmp; 
+              tmp = index + 1;  
+              index = tmp % length == 0 ? index: tmp;
+              h++;
+              tmp = index + area;
+              if (h < height) index = tmp;
+              else h = height -1;
+        
+          }
+          break;
+
+      case "ArrowUp":
+          pitch = vid.pnlmViewer.getPitch();
+          yaw = vid.pnlmViewer.getYaw();
+
+          return;
+
+
+      case "ArrowDown":
+          pitch = vid.pnlmViewer.getPitch();
+          yaw = vid.pnlmViewer.getYaw();
+
+      return;   
+      case "ArrowLeft":
+          pitch = vid.pnlmViewer.getPitch();
+          yaw = vid.pnlmViewer.getYaw();
+
+          return;
+
+
+      case "ArrowRight":
+          pitch = vid.pnlmViewer.getPitch();
+          yaw = vid.pnlmViewer.getYaw();
+
+      return; 
+
+      default:
+          return;
+
+
+
+
+  }
+
+var currentTime = vid.currentTime();
+console.log(currentTime);
+play360Video(index, currentTime);
+vid.pnlmViewer.setPitch(pitch, 0);
+vid.pnlmViewer.setYaw(yaw, 0);
+vid.pnlmViewer.setHfov(hfov, 0);
+
+
+
+
+
+ 
+});
+
+window.addEventListener( 'mousemove', function (event){
+
+    pitch = vid.pnlmViewer.getPitch();
+    yaw = vid.pnlmViewer.getYaw();
+
+    console.log(pitch, yaw);
+
+
+}, false );
+
+window.addEventListener("wheel", (event) =>{
+    hfov = vid.pnlmViewer.getHfov();
+
+}, false);
+
+function findKey(pitch, yaw, key) {
+    if (yaw > 180) yaw = yaw -360;
+
+    key =  key.replace(/\ı/g, "i");
+
+    if (!(pitch > pitch_thres || pitch < -pitch_thres) && !(yaw > yaw_thres || yaw < -yaw_thres)) {
+        
+
+    } else if (pitch > pitch_thres && !(yaw > yaw_thres || yaw < -yaw_thres)  )   {
+        if (key=="i") key = "ui";
+        else if (key=="j") key = "j";
+        else if (key=="k") key = "hk";
+        else if (key=="l") key = "l";
+    } else if (pitch < -pitch_thres && !(yaw > yaw_thres || yaw < -yaw_thres)  )   {
+        if (key=="i") key = "hi";
+        else if (key=="j") key = "j";
+        else if (key=="k") key = "uk";
+        else if (key=="l") key = "l";
+    } 
+    
+    else if (!(pitch > pitch_thres || pitch < -pitch_thres) && (yaw > yaw_thres && yaw < 3*yaw_thres) ){
+        if (key=="i") key = "li";
+        else if (key=="j") key = "ij";
+        else if (key=="k") key = "jk";
+        else if (key=="l") key = "kl";
+    } else if ( pitch > pitch_thres && (yaw > yaw_thres && yaw < 3*yaw_thres) ) {
+        if (key=="i") key = "uli";
+        else if (key=="j") key = "ij";
+        else if (key=="k") key = "hjk";
+        else if (key=="l") key = "kl";
+    } else if ( pitch < -pitch_thres && (yaw > yaw_thres && yaw < 3*yaw_thres) ) {
+        if (key=="i") key = "hli";
+        else if (key=="j") key = "ij";
+        else if (key=="k") key = "ujk";
+        else if (key=="l") key = "kl";
+    }
+    
+    else if (!(pitch > pitch_thres || pitch < -pitch_thres) && (yaw > 3*yaw_thres && yaw < 5*yaw_thres) ) {
+        if (key=="i") key = "l";
+        else if (key=="j") key = "i";
+        else if (key=="k") key = "j";
+        else if (key=="l") key = "k";
+    } else if ( pitch > pitch_thres && (yaw > 3*yaw_thres && yaw < 5*yaw_thres) ) {
+        if (key=="i") key = "ul";
+        else if (key=="j") key = "i";
+        else if (key=="k") key = "hj";
+        else if (key=="l") key = "k";
+    } else if ( pitch < -pitch_thres && (yaw > 3*yaw_thres && yaw < 5*yaw_thres) ) {
+        if (key=="i") key = "hl";
+        else if (key=="j") key = "i";
+        else if (key=="k") key = "uj";
+        else if (key=="l") key = "k";
+    } 
+    
+    else if (!(pitch > pitch_thres || pitch < -pitch_thres) && (yaw > 5*yaw_thres && yaw < 7*yaw_thres) ) {
+        if (key=="i") key = "kl";
+        else if (key=="j") key = "li";
+        else if (key=="k") key = "ij";
+        else if (key=="l") key = "jk";
+
+    } else if (pitch > pitch_thres  && (yaw > 5*yaw_thres && yaw < 7*yaw_thres)) {
+        if (key=="i") key = "ukl";
+        else if (key=="j") key = "li";
+        else if (key=="k") key = "hij";
+        else if (key=="l") key = "jk";
+    }  else if (pitch < -pitch_thres  && (yaw > 5*yaw_thres && yaw < 7*yaw_thres)) {
+        if (key=="i") key = "hkl";
+        else if (key=="j") key = "li";
+        else if (key=="k") key = "uij";
+        else if (key=="l") key = "jk";
+
+    } 
+    
+    else if ( !(pitch > pitch_thres || pitch < -pitch_thres) && (yaw > 7*yaw_thres || yaw < -7*yaw_thres)) {
+        if (key=="i") key = "k";
+        else if (key=="j") key = "l";
+        else if (key=="k") key = "i";
+        else if (key=="l") key = "j";
+    } else if (pitch > pitch_thres  && (yaw > 7*yaw_thres || yaw < -7*yaw_thres)) {
+        if (key=="i") key = "uk";
+        else if (key=="j") key = "l";
+        else if (key=="k") key = "hi";
+        else if (key=="l") key = "j";
+    } else if (pitch < -pitch_thres  && (yaw > 7*yaw_thres || yaw < -7*yaw_thres)) {
+        if (key=="i") key = "hk";
+        else if (key=="j") key = "l";
+        else if (key=="k") key = "ui";
+        else if (key=="l") key = "j";
+    }
+
+    else if ( !(pitch > pitch_thres || pitch < -pitch_thres) && (yaw < -5*yaw_thres && yaw > -7*yaw_thres)) {
+        if (key=="i") key = "jk";
+        else if (key=="j") key = "kl";
+        else if (key=="k") key = "li";
+        else if (key=="l") key = "ij";
+    } else if (pitch > pitch_thres  && (yaw < -5*yaw_thres && yaw > -7*yaw_thres)){
+        if (key=="i") key = "ujk";
+        else if (key=="j") key = "kl";
+        else if (key=="k") key = "hli";
+        else if (key=="l") key = "ij";
+    } else if (pitch < -pitch_thres  && (yaw < -5*yaw_thres && yaw > -7*yaw_thres)){
+        if (key=="i") key = "hjk";
+        else if (key=="j") key = "kl";
+        else if (key=="k") key = "uli";
+        else if (key=="l") key = "ij";
+    }
+
+    else if ( !(pitch > pitch_thres || pitch < -pitch_thres) && (yaw < -3*yaw_thres && yaw > -5*yaw_thres)) {
+        if (key=="i") key = "j";
+        else if (key=="j") key = "k";
+        else if (key=="k") key = "l";
+        else if (key=="l") key = "i";
+    } else if (pitch > pitch_thres  && (yaw < -3*yaw_thres && yaw > -5*yaw_thres)) {
+        if (key=="i") key = "uj";
+        else if (key=="j") key = "k";
+        else if (key=="k") key = "hl";
+        else if (key=="l") key = "i";
+    } else if (pitch < -pitch_thres  && (yaw < -3*yaw_thres && yaw > -5*yaw_thres)) {
+        if (key=="i") key = "hj";
+        else if (key=="j") key = "k";
+        else if (key=="k") key = "ul";
+        else if (key=="l") key = "i";
+    }
+
+    else if ( !(pitch > pitch_thres || pitch < -pitch_thres) && (yaw < -yaw_thres && yaw > -3*yaw_thres)) {
+        if (key=="i") key = "ij";
+        else if (key=="j") key = "jk";
+        else if (key=="k") key = "kl";
+        else if (key=="l") key = "li";
+    } else if (pitch > pitch_thres  && (yaw < -yaw_thres && yaw > -3*yaw_thres)) {
+        if (key=="i") key = "uij";
+        else if (key=="j") key = "jk";
+        else if (key=="k") key = "hkl";
+        else if (key=="l") key = "li";
+    } else if (pitch < -pitch_thres  && (yaw < -yaw_thres && yaw > -3*yaw_thres)) {
+        if (key=="i") key = "hij";
+        else if (key=="j") key = "jk";
+        else if (key=="k") key = "ukl";
+        else if (key=="l") key = "li";
+
+    }
+   
+    return key;
+
+}
+
+
+
+
+</script>
+
+
+<!-- <video id="panorama1"   preload="auto" loop  muted autoplay crossorigin="anonymous">
+    <source src="/examples/images/video/sample1.mp4" type="video/mp4"/>
+</video>
+
+<canvas id="canvas" width="640" height="360"></canvas> -->
+
+<!-- <script> 
+        var canvas = document.getElementById("canvas");
+        var ctx = canvas.getContext("2d");
+
+        var video = document.getElementById("panorama1");
+        video.addEventListener('loadeddata', function() {
+        
+          video.play();  
+          setTimeout(videoLoop, 5);
+        
+        
+          pannellum.viewer('panorama_viewer', {
+	            "type": "equirectangular",
+	            "panorama": canvas,
+	            "dynamic": true,
+	            "dynamicUpdate": true,
+	            "autoLoad": true,
+	        })
+        
+        
+        });
+        
+        function videoLoop() {
+            if (video && !video.paused && !video.ended) {
+                ctx.drawImage(video, 0, 0, 640, 360);
+                setTimeout(videoLoop, 5);
+            }
+        }
+
+</script> -->
+
+
+</body>
+</html>

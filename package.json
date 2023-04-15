@@ -19,5 +19,9 @@
   "keywords": [
     "panorama",
     "viewer"
-  ]
+  ],
+  "dependencies": {
+    "videojs-playlist": "^5.0.1",
+    "videojs-rotate-player-plugin": "^1.0.1"
+  }
 }
