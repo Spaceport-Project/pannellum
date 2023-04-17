@@ -42,8 +42,8 @@
 
 const pitch_thres = 180/6;
 const yaw_thres = 180/8;
-const length = 3;
-const width = 15;
+const length = 15;
+const width = 3;
 const height = 3;
 const area = length * width;
 const volume = length * width * height;
@@ -52,8 +52,8 @@ var h = Math.floor(index / area);
 var pitch = 0, yaw = 0, hfov = 140;
 //var basepath = "/examples/dynamic_grid_6x2"
 // var basepath = "/examples/dy_spinach"
-var basepath = "./media/grid_dy_spinach_15x3x3"
-
+//var basepath = "./media/grid_dy_spinach_15x3x3"
+var basepath = "./media/grid_salmon"
 
 var player = videojs('panorama', {
           plugins: {
@@ -66,7 +66,7 @@ var list = [];
 for (let i = 0 ; i < volume ; i++) {
 list.push({
   sources: [{
-    src: `${basepath}/grid_${i}.mp4`,
+    src: basepath + "/grid_" + i + ".mp4",
     type: 'video/mp4'
   }]});
 
@@ -92,7 +92,7 @@ window.addEventListener('keydown', function(event) {
 
 //  console.log(pitch, yaw);
 
-  var key = findKey(pitch, yaw, event.key);
+  var key = findKey(pitch, yaw +90, event.key);
   console.log(key);
   var currentTime = player.currentTime();
   var prev = index;
@@ -100,8 +100,8 @@ window.addEventListener('keydown', function(event) {
       case "j":
           {               
               
-              const tmp = index - length;
-              index = tmp < h * area ? index: tmp; 
+              const tmp = index + length;
+              index = tmp >= ( h + 1) * area ? index: tmp;
               
 
           } 
@@ -110,9 +110,9 @@ window.addEventListener('keydown', function(event) {
 
       case "l":
           {
-              const tmp = index + length;
-              index = tmp >= ( h + 1) * area ? index: tmp;
-            
+              const tmp = index - length;
+              index = tmp < h * area ? index: tmp; 
+
           }
 
           break;
@@ -162,8 +162,9 @@ window.addEventListener('keydown', function(event) {
 
       case "li":
           {
-              let tmp = index + length;
-              index = tmp >= ( h + 1) * area ? index: tmp;
+              let tmp = index - length;
+              index = tmp < h * area ? index: tmp; 
+
               tmp = index + 1;  
               index = tmp % length == 0 ? index: tmp;
               
@@ -174,8 +175,9 @@ window.addEventListener('keydown', function(event) {
 
       case "ij":
           {
-              let tmp = index - length;
-              index = tmp < h * area ? index: tmp; 
+              let tmp = index + length;
+              index = tmp >= ( h + 1) * area ? index: tmp;
+
               tmp = index + 1;  
               index = tmp % length == 0 ? index: tmp;
         
@@ -185,8 +187,9 @@ window.addEventListener('keydown', function(event) {
 
       case "jk": 
           {
-              let tmp = index - length;
-              index = tmp < h * area ? index: tmp; 
+              let tmp = index + length;
+              index = tmp >= ( h + 1) * area ? index: tmp;
+
               tmp = index - 1;  
               index = (tmp + 1) % length == 0 ? index: tmp;
             
@@ -197,8 +200,8 @@ window.addEventListener('keydown', function(event) {
       case "kl":
           {
 
-              let tmp = index + length;
-              index = tmp >= ( h + 1) * area ? index: tmp;
+              let tmp = index - length;
+              index = tmp < h * area ? index: tmp; 
               tmp = index - 1;  
               index = (tmp + 1) % length == 0 ? index: tmp;
              
@@ -266,8 +269,8 @@ window.addEventListener('keydown', function(event) {
       
       case "ul":
           {
-              let tmp = index + length;
-              index = tmp >= ( h + 1) * area ? index: tmp;
+              let tmp = index - length;
+              index = tmp < h * area ? index: tmp; 
               h++;
               tmp = index + area;
               if (h < height) index = tmp;
@@ -280,8 +283,8 @@ window.addEventListener('keydown', function(event) {
       case "hj":
           {
 
-              let tmp = index - length;
-              index = tmp < h * area ? index: tmp;  
+              let tmp = index + length;
+              index = tmp >= ( h + 1) * area ? index: tmp;
               h--;
               tmp = index - area;
               if (h < 0) h = 0;
@@ -294,8 +297,8 @@ window.addEventListener('keydown', function(event) {
       case "hl":
 
           {
-              let tmp = index + length;
-              index = tmp >= ( h + 1) * area ? index: tmp;
+              let tmp = index - length;
+              index = tmp < h * area ? index: tmp; 
               h--;
               tmp = index - area;
               if (h < 0) h = 0;
@@ -307,8 +310,8 @@ window.addEventListener('keydown', function(event) {
       
       case "uj": 
           {
-              let tmp = index - length;
-              index = tmp < h * area ? index: tmp; 
+              let tmp = index + length;
+              index = tmp >= ( h + 1) * area ? index: tmp;
               h++;
               tmp = index + area;
               if (h < height) index = tmp;
@@ -320,8 +323,8 @@ window.addEventListener('keydown', function(event) {
       case "uli":
           {
 
-              let tmp = index + length;
-              index = tmp >= ( h + 1) * area ? index: tmp;
+              let tmp = index - length;
+              index = tmp < h * area ? index: tmp; 
               tmp = index + 1;  
               index = tmp % length == 0 ? index: tmp;
               h++;
@@ -335,8 +338,8 @@ window.addEventListener('keydown', function(event) {
       case "hjk":
           {
 
-              let tmp = index - length;
-              index = tmp < h * area ? index: tmp; 
+              let tmp = index + length;
+              index = tmp >= ( h + 1) * area ? index: tmp;
               tmp = index - 1;  
               index = (tmp + 1) % length == 0 ? index: tmp;
               h--;
@@ -349,8 +352,8 @@ window.addEventListener('keydown', function(event) {
       
       case "hli":
           {
-              let tmp = index + length;
-              index = tmp >= ( h + 1) * area ? index: tmp;
+              let tmp = index - length;
+              index = tmp < h * area ? index: tmp; 
               tmp = index + 1;  
               index = tmp % length == 0 ? index: tmp;
               h--;
@@ -364,8 +367,8 @@ window.addEventListener('keydown', function(event) {
       case "ujk":
           {
 
-              let tmp = index - length;
-              index = tmp < h * area ? index: tmp; 
+              let tmp = index + length;
+              index = tmp >= ( h + 1) * area ? index: tmp;
               tmp = index - 1;  
               index = (tmp + 1) % length == 0 ? index: tmp;
               h++;
@@ -379,8 +382,8 @@ window.addEventListener('keydown', function(event) {
       
       case "ukl":
           {
-              let tmp = index + length;
-              index = tmp >= ( h + 1) * area ? index: tmp;
+              let tmp = index - length;
+              index = tmp < h * area ? index: tmp; 
               tmp = index - 1;  
               index = (tmp + 1) % length == 0 ? index: tmp;
               h++;
@@ -394,8 +397,8 @@ window.addEventListener('keydown', function(event) {
       case "hij":
 
           {
-              let tmp = index - length;
-              index = tmp < h * area ? index: tmp; 
+              let tmp = index + length;
+              index = tmp >= ( h + 1) * area ? index: tmp;
               tmp = index + 1;  
               index = tmp % length == 0 ? index: tmp;
               h--;
@@ -410,8 +413,8 @@ window.addEventListener('keydown', function(event) {
       case "hkl":
 
           {
-              let tmp = index + length;
-              index = tmp >= ( h + 1) * area ? index: tmp;
+              let tmp = index - length;
+              index = tmp < h * area ? index: tmp; 
               tmp = index - 1;  
               index = (tmp + 1) % length == 0 ? index: tmp;
               h--;
@@ -425,8 +428,8 @@ window.addEventListener('keydown', function(event) {
 
       case "uij" : 
           {
-              let tmp = index - length;
-              index = tmp < h * area ? index: tmp; 
+              let tmp = index + length;
+              index = tmp >= ( h + 1) * area ? index: tmp;
               tmp = index + 1;  
               index = tmp % length == 0 ? index: tmp;
               h++;
