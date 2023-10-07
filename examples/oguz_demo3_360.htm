@@ -2,7 +2,7 @@
 <html>
 <head>
     <meta charset="utf-8">
-    <title> IBC Demo 1</title>
+    <title> IBC Demo 2</title>
     <!-- <link rel="stylesheet" href="https://cdn.pannellum.org/2.5/pannellum.css"/> -->
     <link rel="stylesheet" href="../src/css/pannellum.css">
     <link rel="icon" href="./spaceport_logo.png" type="image/png">
@@ -120,8 +120,11 @@
     </style>
 
 
+
 </head>
  <body>
+
+  
   <div class="video-container">
     <div class="info">
         <i class="icon-info-sign"></i>
@@ -134,16 +137,23 @@
       </div>
     <video id="panorama" class="video-js vjs-big-play-centered " controls="" preload="auto" autoplay="true" width="1440px" height="720px"
     crossorigin="anonymous" >
-        <source src="./media/yoga_IBC_180_grid_videos/grid_16.mp4" type="video/mp4" />
+        <source src="./media/oguz_360_grid_videos/grid_21.mp4" type="video/mp4" />
         <p class="vjs-no-js">
             To view this video please enable JavaScript, and consider upgrading to
             a web browser that <a href="http://videojs.com/html5-video-support/"
             target="_blank">supports HTML5 video</a>
         </p>
     </video>
+ 
     <div class = "icon"  id="svg-container"></div>
+   
+
+
 </div>
-<script>
+
+
+ <script>
+
 document.addEventListener('DOMContentLoaded', function() {
     fetch('./arrows.svg')
         .then(response => response.text())
@@ -190,12 +200,12 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 const pitch_thres = 180/6;
 const yaw_thres = 180/8;
-const length = 12;
-const width = 6;
+const length = 13;
+const width = 18;
 const height = 1;
 const area = length * width;
 const volume = length * width * height;
-var index_init = 16;
+var index_init = 104;
 var index= index_init;
 var h = Math.floor(index / area);
 var hfov_init= 120.0;
@@ -205,7 +215,7 @@ var hfov = hfov_init;
 var pitch = pitch_init;
 var yaw = yaw_init;
 
-var basepath = "./media/yoga_IBC_180_grid_videos";
+var basepath = "./media/oguz_360_grid_videos";
 
 var player = videojs('panorama', {
           plugins: {
@@ -224,12 +234,11 @@ list.push({
 
 
 }
-
 player.playlist(list);
+
 player.pnlmViewer.setPitch(pitch, 0);
 player.pnlmViewer.setYaw(yaw, 0);
 player.pnlmViewer.setHfov(hfov, 0);
-
 player.playlist.autoadvance(0);
 player.playlist.currentItem(index);
 player.requestFullscreen();
@@ -244,20 +253,17 @@ player.on('ended', function (){
 })
 
 window.addEventListener('keydown', function(event) {
-
-//  console.log(pitch, yaw);
-
-var key = findKey(pitch, yaw - 90, event.key);
+ 
+  var key = findKey(pitch, yaw , event.key);
   console.log(key);
   var currentTime = player.currentTime();
   var prev = index;
-  
   switch (key) {
       case "j":
           {               
               
-              const tmp = index + length;
-              index = tmp >= ( h + 1) * area ? index: tmp;
+              const tmp = index - length;
+              index = tmp < h * area ? index: tmp; 
               
 
           } 
@@ -266,9 +272,9 @@ var key = findKey(pitch, yaw - 90, event.key);
 
       case "l":
           {
-              const tmp = index - length;
-              index = tmp < h * area ? index: tmp; 
-
+              const tmp = index + length;
+              index = tmp >= ( h + 1) * area ? index: tmp;
+            
           }
 
           break;
@@ -318,9 +324,8 @@ var key = findKey(pitch, yaw - 90, event.key);
 
       case "li":
           {
-              let tmp = index - length;
-              index = tmp < h * area ? index: tmp; 
-
+              let tmp = index + length;
+              index = tmp >= ( h + 1) * area ? index: tmp;
               tmp = index + 1;  
               index = tmp % length == 0 ? index: tmp;
               
@@ -331,9 +336,8 @@ var key = findKey(pitch, yaw - 90, event.key);
 
       case "ij":
           {
-              let tmp = index + length;
-              index = tmp >= ( h + 1) * area ? index: tmp;
-
+              let tmp = index - length;
+              index = tmp < h * area ? index: tmp; 
               tmp = index + 1;  
               index = tmp % length == 0 ? index: tmp;
         
@@ -343,9 +347,8 @@ var key = findKey(pitch, yaw - 90, event.key);
 
       case "jk": 
           {
-              let tmp = index + length;
-              index = tmp >= ( h + 1) * area ? index: tmp;
-
+              let tmp = index - length;
+              index = tmp < h * area ? index: tmp; 
               tmp = index - 1;  
               index = (tmp + 1) % length == 0 ? index: tmp;
             
@@ -356,8 +359,8 @@ var key = findKey(pitch, yaw - 90, event.key);
       case "kl":
           {
 
-              let tmp = index - length;
-              index = tmp < h * area ? index: tmp; 
+              let tmp = index + length;
+              index = tmp >= ( h + 1) * area ? index: tmp;
               tmp = index - 1;  
               index = (tmp + 1) % length == 0 ? index: tmp;
              
@@ -425,8 +428,8 @@ var key = findKey(pitch, yaw - 90, event.key);
       
       case "ul":
           {
-              let tmp = index - length;
-              index = tmp < h * area ? index: tmp; 
+              let tmp = index + length;
+              index = tmp >= ( h + 1) * area ? index: tmp;
               h++;
               tmp = index + area;
               if (h < height) index = tmp;
@@ -439,8 +442,8 @@ var key = findKey(pitch, yaw - 90, event.key);
       case "hj":
           {
 
-              let tmp = index + length;
-              index = tmp >= ( h + 1) * area ? index: tmp;
+              let tmp = index - length;
+              index = tmp < h * area ? index: tmp;  
               h--;
               tmp = index - area;
               if (h < 0) h = 0;
@@ -453,8 +456,8 @@ var key = findKey(pitch, yaw - 90, event.key);
       case "hl":
 
           {
-              let tmp = index - length;
-              index = tmp < h * area ? index: tmp; 
+              let tmp = index + length;
+              index = tmp >= ( h + 1) * area ? index: tmp;
               h--;
               tmp = index - area;
               if (h < 0) h = 0;
@@ -466,8 +469,8 @@ var key = findKey(pitch, yaw - 90, event.key);
       
       case "uj": 
           {
-              let tmp = index + length;
-              index = tmp >= ( h + 1) * area ? index: tmp;
+              let tmp = index - length;
+              index = tmp < h * area ? index: tmp; 
               h++;
               tmp = index + area;
               if (h < height) index = tmp;
@@ -479,8 +482,8 @@ var key = findKey(pitch, yaw - 90, event.key);
       case "uli":
           {
 
-              let tmp = index - length;
-              index = tmp < h * area ? index: tmp; 
+              let tmp = index + length;
+              index = tmp >= ( h + 1) * area ? index: tmp;
               tmp = index + 1;  
               index = tmp % length == 0 ? index: tmp;
               h++;
@@ -494,8 +497,8 @@ var key = findKey(pitch, yaw - 90, event.key);
       case "hjk":
           {
 
-              let tmp = index + length;
-              index = tmp >= ( h + 1) * area ? index: tmp;
+              let tmp = index - length;
+              index = tmp < h * area ? index: tmp; 
               tmp = index - 1;  
               index = (tmp + 1) % length == 0 ? index: tmp;
               h--;
@@ -508,8 +511,8 @@ var key = findKey(pitch, yaw - 90, event.key);
       
       case "hli":
           {
-              let tmp = index - length;
-              index = tmp < h * area ? index: tmp; 
+              let tmp = index + length;
+              index = tmp >= ( h + 1) * area ? index: tmp;
               tmp = index + 1;  
               index = tmp % length == 0 ? index: tmp;
               h--;
@@ -523,8 +526,8 @@ var key = findKey(pitch, yaw - 90, event.key);
       case "ujk":
           {
 
-              let tmp = index + length;
-              index = tmp >= ( h + 1) * area ? index: tmp;
+              let tmp = index - length;
+              index = tmp < h * area ? index: tmp; 
               tmp = index - 1;  
               index = (tmp + 1) % length == 0 ? index: tmp;
               h++;
@@ -538,8 +541,8 @@ var key = findKey(pitch, yaw - 90, event.key);
       
       case "ukl":
           {
-              let tmp = index - length;
-              index = tmp < h * area ? index: tmp; 
+              let tmp = index + length;
+              index = tmp >= ( h + 1) * area ? index: tmp;
               tmp = index - 1;  
               index = (tmp + 1) % length == 0 ? index: tmp;
               h++;
@@ -553,8 +556,8 @@ var key = findKey(pitch, yaw - 90, event.key);
       case "hij":
 
           {
-              let tmp = index + length;
-              index = tmp >= ( h + 1) * area ? index: tmp;
+              let tmp = index - length;
+              index = tmp < h * area ? index: tmp; 
               tmp = index + 1;  
               index = tmp % length == 0 ? index: tmp;
               h--;
@@ -569,8 +572,8 @@ var key = findKey(pitch, yaw - 90, event.key);
       case "hkl":
 
           {
-              let tmp = index - length;
-              index = tmp < h * area ? index: tmp; 
+              let tmp = index + length;
+              index = tmp >= ( h + 1) * area ? index: tmp;
               tmp = index - 1;  
               index = (tmp + 1) % length == 0 ? index: tmp;
               h--;
@@ -584,8 +587,8 @@ var key = findKey(pitch, yaw - 90, event.key);
 
       case "uij" : 
           {
-              let tmp = index + length;
-              index = tmp >= ( h + 1) * area ? index: tmp;
+              let tmp = index - length;
+              index = tmp < h * area ? index: tmp; 
               tmp = index + 1;  
               index = tmp % length == 0 ? index: tmp;
               h++;
@@ -629,14 +632,14 @@ var key = findKey(pitch, yaw - 90, event.key);
 
   }
 
+
     player.pnlmViewer.setPitch(pitch, 0);
     player.pnlmViewer.setYaw(yaw, 0);
     player.pnlmViewer.setHfov(hfov, 0);
     console.log(index);
     if (prev !== index) {
-    player.playlist.currentItem(index);
-
-    setTimeout(()=> {player.currentTime(currentTime);}, 1);
+        player.playlist.currentItem(index);
+        setTimeout(()=> {player.currentTime(currentTime);}, 1);
     }
 
 
@@ -655,6 +658,7 @@ window.addEventListener("wheel", (event) =>{
     hfov = player.pnlmViewer.getHfov();
 
 }, false);
+
 
 function findKey(pitch, yaw, key) {
     if (yaw > 180) yaw = yaw -360;
